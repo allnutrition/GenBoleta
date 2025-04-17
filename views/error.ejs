@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9fb;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 30px;
+        }
+        .logo-container {
+            width: 100%;
+            display: flex;
+            justify-content: flex-start;
+            padding-left: 30px;
+            box-sizing: border-box;
+        }
+        .logo {
+            width: 300px;
+            margin-bottom: 30px;
+            cursor: pointer;
+        }
+        .error-container {
+            text-align: center;
+            max-width: 600px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #6b3074;
+        }
+        .error-message {
+            font-size: 1.2em;
+            margin: 20px 0;
+        }
+        .back-button {
+            padding: 10px 20px;
+            font-size: 1em;
+            color: #fff;
+            background-color: #6b3074;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 20px;
+        }
+        .back-button:hover {
+            background-color: #4e2055;
+        }
+    </style>
+</head>
+<body>
+    <div class="logo-container">
+        <a href="/">
+            <img src="/images/Logo.png" alt="Logo AllNutrition" class="logo">
+        </a>
+    </div>
+
+    <div class="error-container">
+        <h1>Error</h1>
+        <div class="error-message">
+            <%= message %>
+        </div>
+        <% if (error.status) { %>
+            <p>Estado: <%= error.status %></p>
+        <% } %>
+        <button class="back-button" onclick="window.location.href='/'">Volver al inicio</button>
+    </div>
+</body>
+</html>

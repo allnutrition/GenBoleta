@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generar Boleta</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <!-- Información de la empresa en la esquina superior derecha -->
+    <div class="company-info">
+        <p>RUT Empresa: <span id="rutEmpresa"></span></p>
+        <p>Empresa: <span id="razonSocial"></span></p>
+        <p>Nº de tienda: <span id="numeroTienda"></span></p>
+        <p>Dirección de tienda: <span id="direccionTienda"></span></p>
+    </div>
+
+    <!-- Contenedor para el logo alineado a la izquierda con enlace a home -->
+    <div class="logo-container">
+        <a href="/">
+            <img src="/images/Logo.png" alt="Logo AllNutrition" class="logo">
+        </a>
+    </div>
+
+    <h1>Generar Boleta</h1>
+
+    <table class="product-table" id="productTable">
+        <thead>
+            <tr>
+                <th>Código de Barra</th>
+                <th>ALU</th>
+                <th>Descripción</th>
+                <th>Precio</th>
+                <th>Cantidad</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><input type="text" class="codigo" oninput="fetchData(this)"></td>
+                <td><input type="text" class="alu" readonly></td>
+                <td><input type="text" class="descripcion" readonly></td>
+                <td><input type="text" class="precio" oninput="calculateTotal()"></td>
+                <td><input type="number" class="cantidad" min="1" value="1" oninput="calculateTotal()" onkeydown="return event.keyCode !== 190 && event.keyCode !== 188"></td>
+                <td class="action-buttons">
+                    <button class="add-button" onclick="addRow()">+</button>
+                    <button class="delete-button" onclick="removeRow(this)">Eliminar</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <button class="generate-button" onclick="generarBoleta()">Generar Boleta Electrónica</button>
+
+    <!-- Campo para mostrar el total -->
+    <div class="total">Total: $<span id="totalAmount">0</span></div>
+
+    <div id="resultado" class="result"></div>
+
+    <!-- iframe oculto para cargar el PDF y activar la impresión -->
+    <iframe id="printFrame"></iframe>
+
+    <script src="/js/index.js"></script>
+</body>
+</html>

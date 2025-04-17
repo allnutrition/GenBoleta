@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enviar Boletas Pendientes</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <!-- Contenedor para el logo alineado a la izquierda con enlace a home -->
+    <div class="logo-container">
+        <a href="/">
+            <img src="/images/Logo.png" alt="Logo AllNutrition" class="logo">
+        </a>
+    </div>
+
+    <!-- Contenedor de la selección y el botón, centrado y alineado -->
+    <div class="select-container" id="selectContainer" style="display: none;">
+        <!-- Contenedor para la lista desplegable -->
+        <select id="documentoSelect" onchange="toggleEnviarButton()">
+            <option value="">Seleccione un documento...</option>
+        </select>
+
+        <!-- Botón Enviar, inicialmente oculto -->
+        <button class="menu-button" id="enviarButton" onclick="enviarDocumento()" style="display: none;">Enviar</button>
+    </div>
+
+    <!-- Mensaje de estado, solo se muestra cuando no hay documentos -->
+    <div id="message" class="message"></div>
+
+    <script src="/js/enviar_pendientes.js"></script>
+</body>
+</html>

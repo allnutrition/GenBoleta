@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicio - GeneraBoleta</title>
+    <style>
+        /* Estilos generales */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9fb;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 30px;
+        }
+        /* Contenedor para el logo */
+        .logo-container {
+            width: 100%;
+            display: flex;
+            justify-content: flex-start;
+            padding-left: 30px;
+            box-sizing: border-box;
+        }
+        .logo {
+            width: 300px;
+            margin-bottom: 30px;
+        }
+        .button-container {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-left: 30px;
+        }
+        .menu-button {
+            padding: 15px 30px;
+            font-size: 1.2em;
+            color: #fff;
+            background-color: #6b3074;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .menu-button:hover {
+            background-color: #4e2055;
+        }
+    </style>
+</head>
+<body>
+    <div class="logo-container">
+        <img src="/images/Logo.png" alt="Logo AllNutrition" class="logo">
+    </div>
+
+    <div class="button-container">
+        <button class="menu-button" id="go-to-generator">Ir al Generador de Boletas</button>
+        <button class="menu-button" id="go-to-pending-sender">Enviar Boletas Pendientes</button>
+    </div>
+    
+    <script>
+        document.getElementById('go-to-generator').onclick = function() {
+            window.location.href = "/index";
+        };
+        
+        document.getElementById('go-to-pending-sender').onclick = function() {
+            window.location.href = "/enviar_boletas_pendientes";
+        };
+    </script>
+</body>
+</html>
