@@ -2,6 +2,7 @@ const fs = require('fs-extra');
 const path = require('path');
 const archiver = require('archiver');
 const { execSync } = require('child_process');
+const addProductService = require('./add-product-service');
 
 // Directorios principales
 const rootDir = path.resolve(__dirname, '..');
@@ -164,6 +165,9 @@ objShortcut.Save
 `;
         
         await fs.writeFile(path.join(distDir, 'crear_acceso_directo.vbs'), createShortcutVbs);
+        
+        // Añadir el servicio de actualización de productos
+        await addProductService();
         
         // Crear zip de distribución
         console.log('Creando archivo ZIP...');
