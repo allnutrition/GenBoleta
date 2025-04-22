@@ -1,6 +1,7 @@
 const maxRows = 5;
 let validarProductos = true;
 let isGenerating = false; // Bandera para controlar el estado de generación
+let fetchDebounceTimer = null; // Timer para el debounce
 
 async function obtenerConfiguracion() {
     try {
@@ -69,35 +70,55 @@ function calculateTotal() {
     document.getElementById("totalAmount").textContent = total.toFixed(0);
 }
 
-async function fetchData(input) {
-    if (!validarProductos) return;
+// Función debounce para retrasar la ejecución de fetchData
+function debouncedFetchData(input) {
+    clearTimeout(fetchDebounceTimer); // Limpiar el timer anterior
     
     const row = input.closest("tr");
     const codigo = input.value;
+    
+    // Si el código está vacío, limpiar campos inmediatamente sin consultar
     if (!codigo) {
         row.querySelector('.alu').value = '';
         row.querySelector('.descripcion').value = '';
         row.querySelector('.precio').value = '';
+        calculateTotal();
         return;
     }
-    try {
-        const response = await fetch('/consultar_codigo', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ codigo })
-        });
-        const data = await response.json();
-        if (data.alu && data.precio && data.descripcion) {
-            row.querySelector('.alu').value = data.alu;
-            row.querySelector('.descripcion').value = data.descripcion;
-            row.querySelector('.precio').value = data.precio;
-            calculateTotal();
-        } else {
-            showAlert(data.error || 'Error al obtener datos.');
+
+    // Establecer un nuevo timer
+    fetchDebounceTimer = setTimeout(async () => {
+        try {
+            const response = await fetch('/consultar_codigo', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ codigo })
+            });
+            const data = await response.json();
+            if (data.alu && data.precio && data.descripcion) {
+                row.querySelector('.alu').value = data.alu;
+                row.querySelector('.descripcion').value = data.descripcion;
+                row.querySelector('.precio').value = data.precio;
+                calculateTotal();
+            } else {
+                // Solo mostrar alerta si el campo no está vacío
+                if (codigo) {
+                    showAlert(data.error || 'Error al obtener datos.');
+                }
+            }
+        } catch (error) {
+            // Solo mostrar error si el campo no está vacío
+            if (codigo) {
+                showAlert('Error en la conexión al servidor.');
+            }
         }
-    } catch (error) {
-        showAlert('Error en la conexión al servidor.');
-    }
+    }, 500); // Esperar 500ms antes de hacer la consulta
+}
+
+// Modificar la función fetchData para usar el debounce
+async function fetchData(input) {
+    if (!validarProductos) return;
+    debouncedFetchData(input);
 }
 
 async function generarBoleta() {

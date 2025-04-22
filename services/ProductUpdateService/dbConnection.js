@@ -2,13 +2,8 @@ const sql = require('mssql');
 const config = require('./config');
 const logger = require('./logger');
 
-/**
- * Establece una conexión a SQL Server y ejecuta la consulta configurada
- * @returns {Promise<Array>} - Datos de productos obtenidos de la base de datos
- */
-async function getProductsData() {
+async function getProducts() {
     let pool;
-    
     try {
         logger.info('Conectando a la base de datos SQL Server...');
         pool = await sql.connect(config.database);
@@ -17,9 +12,10 @@ async function getProductsData() {
         const result = await pool.request().query(config.query);
         
         logger.info(`Consulta completada. Se obtuvieron ${result.recordset.length} productos.`);
+        
         return result.recordset;
     } catch (err) {
-        logger.error(`Error al obtener datos de productos: ${err.message}`);
+        logger.error('Error en la conexión o consulta:', err);
         throw err;
     } finally {
         if (pool) {
@@ -27,10 +23,13 @@ async function getProductsData() {
                 await pool.close();
                 logger.info('Conexión a la base de datos cerrada.');
             } catch (err) {
-                logger.error(`Error al cerrar la conexión: ${err.message}`);
+                logger.error('Error al cerrar la conexión:', err);
             }
         }
     }
 }
 
-module.exports = { getProductsData };
+// Exportar las funciones
+module.exports = {
+    getProducts
+};

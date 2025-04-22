@@ -8,13 +8,20 @@ const scriptPath = path.join(__dirname, 'index.js');
 
 // Crear una nueva instancia del servicio
 const svc = new Service({
-    name: config.serviceName,
-    description: config.serviceDescription,
+    name: 'ActualizadorProductosGenBoleta',
+    description: 'Servicio de actualización automática de productos',
     script: scriptPath,
     nodeOptions: [],
-    //// Uncomment these for troubleshooting
-    // workingDirectory: path.dirname(scriptPath),
-    // allowServiceLogon: true,
+    // Aumentar el tiempo de espera y agregar opciones de recuperación
+    stopparentfirst: true,
+    wait: 30,
+    grow: 0.5,
+    maxRetries: 3,
+    maxRestarts: 3,
+    env: [{
+        name: "NODE_ENV",
+        value: "production"
+    }]
 });
 
 /**

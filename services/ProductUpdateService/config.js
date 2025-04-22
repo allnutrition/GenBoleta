@@ -30,10 +30,22 @@ module.exports = {
     // Ruta al archivo Excel de productos
     excelPath: path.join(__dirname, '..', '..', 'data', 'productos.xlsx'),
     
-    // Configuración del programador (dos veces al día)
+    // Configuración del programador
     schedule: {
-        morning: '0 8 * * *',    // 8:00 AM (formato cron)
-        afternoon: '0 15 * * *'  // 3:00 PM (formato cron)
+        // Modo de programación: 'fixed' para horarios específicos, 'interval' para intervalo de horas
+        mode: 'interval',
+        
+        // Configuración para horarios fijos (cuando mode = 'fixed')
+        fixedTimes: {
+            morning: '0 8 * * *',    // 8:00 AM (formato cron)
+            afternoon: '0 15 * * *'   // 3:00 PM (formato cron)
+        },
+        
+        // Configuración para intervalo (cuando mode = 'interval')
+        interval: {
+            hours: 7,                 // Ejecutar cada 7 horas
+            retryDelayHours: 2       // En caso de error, reintentar en 2 horas
+        }
     },
     
     // Nombre del servicio de Windows

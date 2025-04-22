@@ -1,80 +1,66 @@
 const schedule = require('node-schedule');
-const { getProductsData } = require('./dbConnection');
-const { updateProductsExcel } = require('./excelManager');
 const config = require('./config');
+const excelManager = require('./excelManager');
 const logger = require('./logger');
 
-// Mantener referencias a los trabajos programados
-let jobs = [];
+let retryTimeout;
+const RETRY_DELAY = config.schedule.interval.retryDelayHours * 60 * 60 * 1000; // convertir horas a milisegundos
 
-/**
- * Ejecuta el proceso de actualización de productos
- */
-async function updateProcess() {
+async function executeUpdate() {
     try {
-        logger.info('Iniciando proceso de actualización de productos...');
+        logger.info('Iniciando actualización programada...');
+        await excelManager.updateProducts();
+        logger.info('Actualización programada completada con éxito.');
         
-        // Obtener datos de la base de datos
-        const productsData = await getProductsData();
+        // Limpiar cualquier retry pendiente ya que la actualización fue exitosa
+        if (retryTimeout) {
+            clearTimeout(retryTimeout);
+            retryTimeout = null;
+        }
+    } catch (error) {
+        logger.error('Error durante la actualización programada:', error);
         
-        // Actualizar el archivo Excel
-        await updateProductsExcel(productsData);
-        
-        logger.info('Proceso de actualización completado con éxito.');
-    } catch (err) {
-        logger.error(`Error en el proceso de actualización: ${err.message}`);
+        // Programar reintento
+        logger.info(`Programando reintento en ${config.schedule.interval.retryDelayHours} horas...`);
+        retryTimeout = setTimeout(executeUpdate, RETRY_DELAY);
     }
 }
 
-/**
- * Configura las tareas programadas según la configuración
- */
-function setupScheduledJobs() {
-    logger.info('Configurando tareas programadas...');
+function scheduleFixedTimes() {
+    const { morning, afternoon } = config.schedule.fixedTimes;
     
-    // Cancelar trabajos existentes
-    jobs.forEach(job => job.cancel());
-    jobs = [];
+    // Programar actualización de la mañana
+    schedule.scheduleJob(morning, executeUpdate);
+    logger.info(`Servicio programado para ejecutarse a las ${morning}`);
     
-    // Programar la actualización de la mañana
-    logger.info(`Programando actualización matutina: ${config.schedule.morning}`);
-    const morningJob = schedule.scheduleJob(config.schedule.morning, updateProcess);
-    jobs.push(morningJob);
-    
-    // Programar la actualización de la tarde
-    logger.info(`Programando actualización vespertina: ${config.schedule.afternoon}`);
-    const afternoonJob = schedule.scheduleJob(config.schedule.afternoon, updateProcess);
-    jobs.push(afternoonJob);
-    
-    logger.info('Tareas programadas configuradas correctamente.');
+    // Programar actualización de la tarde
+    schedule.scheduleJob(afternoon, executeUpdate);
+    logger.info(`Servicio programado para ejecutarse a las ${afternoon}`);
 }
 
-/**
- * Ejecuta el proceso inmediatamente y configura las tareas programadas
- */
-async function start() {
-    try {
-        // Ejecutar la actualización inmediata al iniciar
-        await updateProcess();
-        
-        // Configurar las tareas programadas
-        setupScheduledJobs();
-        
-        return true;
-    } catch (err) {
-        logger.error(`Error al iniciar el programador: ${err.message}`);
-        return false;
+function scheduleByInterval() {
+    // Ejecutar inmediatamente la primera vez
+    executeUpdate();
+    
+    // Programar ejecuciones cada X horas
+    const rule = new schedule.RecurrenceRule();
+    rule.hour = new schedule.Range(0, 23, config.schedule.interval.hours);
+    rule.minute = 0;
+    
+    schedule.scheduleJob(rule, executeUpdate);
+    logger.info(`Servicio programado para ejecutarse cada ${config.schedule.interval.hours} horas`);
+}
+
+function startScheduler() {
+    logger.info('Iniciando programador de actualizaciones...');
+    
+    if (config.schedule.mode === 'fixed') {
+        scheduleFixedTimes();
+    } else {
+        scheduleByInterval();
     }
 }
 
-/**
- * Detiene todas las tareas programadas
- */
-function stop() {
-    logger.info('Deteniendo tareas programadas...');
-    jobs.forEach(job => job.cancel());
-    jobs = [];
-    logger.info('Todas las tareas programadas han sido detenidas.');
-}
-
-module.exports = { start, stop, updateProcess };
+module.exports = {
+    startScheduler
+};

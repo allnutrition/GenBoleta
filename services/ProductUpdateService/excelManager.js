@@ -1,97 +1,65 @@
-const fs = require('fs');
-const path = require('path');
-const ExcelJS = require('exceljs');
+const Excel = require('exceljs');
+const { getProducts } = require('./dbConnection');
 const config = require('./config');
 const logger = require('./logger');
+const fs = require('fs');
+const path = require('path');
 
-/**
- * Crea o actualiza el archivo Excel de productos con los datos proporcionados
- * @param {Array} productsData - Datos de productos obtenidos de la DB
- * @returns {Promise<void>}
- */
-async function updateProductsExcel(productsData) {
+async function updateProducts() {
     try {
-        logger.info(`Iniciando actualización del archivo Excel en: ${config.excelPath}`);
+        logger.info('Iniciando proceso de actualización de productos...');
         
-        // Crear el directorio si no existe
-        const excelDir = path.dirname(config.excelPath);
-        if (!fs.existsSync(excelDir)) {
-            fs.mkdirSync(excelDir, { recursive: true });
-            logger.info(`Directorio creado: ${excelDir}`);
-        }
+        // Obtener productos de la base de datos
+        const products = await getProducts();
+        logger.info(`Se obtuvieron ${products.length} productos.`);
         
-        // Crear un nuevo libro de Excel
-        const workbook = new ExcelJS.Workbook();
+        // Crear un nuevo workbook cada vez
+        const workbook = new Excel.Workbook();
         
-        // Comprobar si el archivo ya existe
-        let existingFile = false;
-        try {
-            if (fs.existsSync(config.excelPath)) {
-                await workbook.xlsx.readFile(config.excelPath);
-                existingFile = true;
-                logger.info('Archivo Excel existente encontrado y cargado.');
-            }
-        } catch (err) {
-            logger.warn(`No se pudo leer el archivo existente, se creará uno nuevo: ${err.message}`);
-        }
+        // Crear una nueva hoja
+        const worksheet = workbook.addWorksheet('Productos');
         
-        // Obtener o crear la hoja de productos
-        let productsSheet;
-        if (existingFile && workbook.getWorksheet('Productos')) {
-            productsSheet = workbook.getWorksheet('Productos');
-            productsSheet.clearRows(); // Limpiar datos anteriores
-        } else {
-            productsSheet = workbook.addWorksheet('Productos');
-        }
-        
-        // Configurar cabeceras de columnas
-        productsSheet.columns = [
-            { header: 'ALU', key: 'ALU', width: 15 },
-            { header: 'Descripcion', key: 'Descripcion', width: 40 },
-            { header: 'CodigoBarra', key: 'CodigoBarra', width: 20 },
-            { header: 'Precio', key: 'Precio', width: 15 }
+        // Configurar las columnas con nombres estandarizados
+        worksheet.columns = [
+            { header: 'ALU', key: 'alu', width: 15 },
+            { header: 'Descripcion', key: 'descripcion', width: 50 },
+            { header: 'CodigoBarra', key: 'codigoBarra', width: 20 },
+            { header: 'Precio', key: 'precio', width: 15 }
         ];
         
-        // Dar formato a las cabeceras
-        const headerRow = productsSheet.getRow(1);
-        headerRow.font = { bold: true };
-        headerRow.height = 20;
-        
-        // Agregar datos
-        productsSheet.addRows(productsData);
-        
-        // Obtener o crear la hoja de última actualización
-        let updateSheet;
-        if (existingFile && workbook.getWorksheet('UltimaAct')) {
-            updateSheet = workbook.getWorksheet('UltimaAct');
-            updateSheet.clearRows(); // Limpiar datos anteriores
-        } else {
-            updateSheet = workbook.addWorksheet('UltimaAct');
-        }
-        
-        // Configurar columna de última actualización
-        updateSheet.columns = [
-            { header: 'Fecha y Hora', key: 'fechaHora', width: 25 }
-        ];
-        
-        // Formatear cabecera
-        const updateHeaderRow = updateSheet.getRow(1);
-        updateHeaderRow.font = { bold: true };
-        updateHeaderRow.height = 20;
-        
-        // Agregar la fecha y hora actual
-        const now = new Date();
-        updateSheet.addRow({
-            fechaHora: now.toLocaleString('es-ES')
+        // Agregar los productos
+        products.forEach(product => {
+            worksheet.addRow({
+                alu: product.ALU,
+                descripcion: product.Descripcion,
+                codigoBarra: product.CodigoBarra,
+                precio: product.Precio
+            });
         });
         
-        // Guardar el archivo
+        // Asegurarse que el directorio existe
+        const dir = path.dirname(config.excelPath);
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+        }
+        
+        // Si el archivo existe, eliminarlo primero
+        if (fs.existsSync(config.excelPath)) {
+            logger.info('Eliminando archivo Excel existente...');
+            fs.unlinkSync(config.excelPath);
+        }
+        
+        // Guardar el nuevo archivo
+        logger.info('Guardando nuevo archivo Excel...');
         await workbook.xlsx.writeFile(config.excelPath);
-        logger.info(`Archivo Excel actualizado correctamente con ${productsData.length} productos.`);
-    } catch (err) {
-        logger.error(`Error al actualizar el archivo Excel: ${err.message}`);
-        throw err;
+        logger.info('Archivo Excel actualizado correctamente.');
+        
+    } catch (error) {
+        logger.error('Error al actualizar productos:', error);
+        throw error;
     }
 }
 
-module.exports = { updateProductsExcel };
+module.exports = {
+    updateProducts
+};

@@ -5,17 +5,15 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "node index.js update",
-    "install-service": "node install-service.js",
-    "uninstall-service": "node uninstall-service.js"
+    "test": "node test-connection.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "exceljs": "^4.3.0",
-    "mssql": "^9.1.1",
-    "node-schedule": "^2.1.1",
-    "node-windows": "^1.0.0",
-    "winston": "^3.8.2"
+    "exceljs": "4.3.0",
+    "mssql": "9.1.1",
+    "node-schedule": "2.1.1",
+    "node-windows": "1.0.0-beta.6",
+    "winston": "3.8.2"
   }
 }
