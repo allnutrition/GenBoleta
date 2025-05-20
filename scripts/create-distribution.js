@@ -222,7 +222,7 @@ echo   "DIR_ORIGEN": "Av. Del Valle 577",
 echo   "CMNA_ORIGEN": "Huechuraba",
 echo   "CDAD_ORIGEN": "Santiago",
 echo   "NUMERO_TIENDA": %STORE_NUMBER%,
-echo   "ENDPOINT_URL": "http://127.0.0.1:5000/api/transform",
+echo   "ENDPOINT_URL": "http://192.168.1.22:3001/api/transform",
 echo   "AUTH_TOKEN": "YhvsZK3b2yLxER92HyqplE76Lb3y1XV9v4ZGgK3HVcY",
 echo   "LOG_LEVEL": "normal"
 echo }
